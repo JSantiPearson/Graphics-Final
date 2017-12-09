@@ -90,9 +90,9 @@ var whiteFace;
 
 				scene = new THREE.Scene();
 				scene.background = new THREE.Color( 0x000000 );
-				scene.fog = new THREE.Fog( 0x000000, 0, 250 );
+				//scene.fog = new THREE.Fog( 0x000000, 0, 175 );
 
-				var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
+				var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.5 );
 				light.position.set( 0.5, 1, 0.75 );
 				scene.add( light );
 
@@ -115,6 +115,131 @@ var whiteFace;
 				var floor = new THREE.Mesh( floorGeometry, floorMaterial );
 				scene.add( floor );
 
+				//walls
+				var wallGeometry = new THREE.PlaneGeometry( 500, 500, 100, 100 );
+				var wallTexture = new THREE.TextureLoader().load( "textures/wall.jpg" );
+				wallTexture.wrapS = THREE.RepeatWrapping;
+				wallTexture.wrapT = THREE.RepeatWrapping;
+				wallTexture.repeat.set( 4, 4 );
+
+				var wallMaterial = new THREE.MeshLambertMaterial( { map: wallTexture,  side: THREE.DoubleSide } );
+
+				var wall1 = new THREE.Mesh( wallGeometry, wallMaterial );
+				wall1.position.z = -220;
+				scene.add( wall1 );
+
+				var wall2 = new THREE.Mesh( wallGeometry, wallMaterial );
+				wall2.rotation.x = THREE.Math.degToRad(180);
+				wall2.position.z = 220;
+				wall2.position.x = 180;
+				scene.add( wall2 );
+
+				var wall5 = new THREE.Mesh( wallGeometry, wallMaterial );
+				wall5.rotation.x = THREE.Math.degToRad(180);
+				wall5.position.z = 220;
+				wall5.position.x = -380;
+				scene.add( wall5 );
+
+				var wall6 = new THREE.Mesh( wallGeometry, wallMaterial );
+				wall6.rotation.y = THREE.Math.degToRad(90);
+				wall6.position.z = 470;
+				wall6.position.x = -70;
+				scene.add( wall6 );
+
+				var wall7 = new THREE.Mesh( wallGeometry, wallMaterial );
+				wall7.rotation.y = THREE.Math.degToRad(90);
+				wall7.position.z = 470;
+				wall7.position.x = -130;
+				scene.add( wall7 );
+
+				var wall3 = new THREE.Mesh( wallGeometry, wallMaterial );
+				wall3.rotation.y = THREE.Math.degToRad(90);
+				wall3.position.x = 250;
+				scene.add( wall3 );
+
+				var wall4 = new THREE.Mesh( wallGeometry, wallMaterial );
+				wall4.rotation.y = THREE.Math.degToRad(90);
+				wall4.position.x = -250;
+				scene.add( wall4 );
+
+				var gateGeometry = new THREE.PlaneGeometry( 60, 100, 100, 100 );
+				var gateTexture = new THREE.TextureLoader().load( "textures/Gate.jpg" );
+				var gateMaterial = new THREE.MeshLambertMaterial( { map: gateTexture, side: THREE.DoubleSide, transparent: true } );
+				var gate = new THREE.Mesh( gateGeometry, gateMaterial );
+				//gate.rotation.y = THREE.Math.degToRad(-90);
+				gate.position.z = 320;
+				gate.position.x = -100;
+
+				scene.add( gate );
+
+				//ceiling
+
+				var ceilingGeometry = new THREE.PlaneGeometry( 2000, 2000, 100, 100 );
+				var ceilingTexture = new THREE.TextureLoader().load( "textures/ceiling.jpg" );
+				ceilingTexture.wrapS = THREE.RepeatWrapping;
+				ceilingTexture.wrapT = THREE.RepeatWrapping;
+				ceilingTexture.repeat.set( 11, 11 );
+
+				var ceilingMaterial = new THREE.MeshLambertMaterial( { map: ceilingTexture,  side: THREE.DoubleSide } );
+
+				var ceiling = new THREE.Mesh( ceilingGeometry, ceilingMaterial );
+				ceiling.rotation.x = THREE.Math.degToRad(90);
+				ceiling.position.y = 40;
+				scene.add( ceiling );
+
+
+				//pillars
+				var pillarGeometry = new THREE.BoxGeometry( 30, 80, 15 );
+				var pillarTexture = new THREE.TextureLoader().load( "textures/pillar.png" );
+				pillarTexture.wrapS = THREE.RepeatWrapping;
+				pillarTexture.wrapT = THREE.RepeatWrapping;
+
+				var pillarMaterial = new THREE.MeshLambertMaterial( { map: pillarTexture } );
+
+				var pillar1 = new THREE.Mesh( pillarGeometry, pillarMaterial );
+				var pillar2 = new THREE.Mesh( pillarGeometry, pillarMaterial );
+				var pillar3 = new THREE.Mesh( pillarGeometry, pillarMaterial );
+				var pillar4 = new THREE.Mesh( pillarGeometry, pillarMaterial );
+				var pillar5 = new THREE.Mesh( pillarGeometry, pillarMaterial );
+				var pillar6 = new THREE.Mesh( pillarGeometry, pillarMaterial );
+
+				pillar1.position.z = 80;
+				pillar1.position.x = -10;
+
+				pillar2.position.z = 80;
+				pillar2.position.x = 170;
+
+				pillar3.position.z = 80;
+				pillar3.position.x = -190;
+
+				pillar4.position.z = -100;
+				pillar4.position.x = -10;
+
+				pillar5.position.z = -100;
+				pillar5.position.x = 170;
+
+				pillar6.position.z = -100;
+				pillar6.position.x = -190;
+
+				scene.add( pillar1 );
+				scene.add( pillar2 );
+				scene.add( pillar3 );
+				scene.add( pillar4 );
+				scene.add( pillar5 );
+				scene.add( pillar6 );
+
+				objects.push( pillar1 );
+
+				//arrow
+				var arrowGeometry = new THREE.PlaneGeometry( 20, 20, 100, 100 );
+				var arrowTexture = new THREE.TextureLoader().load( "textures/arrow.png" );
+				var arrowMaterial = new THREE.MeshLambertMaterial( { map: arrowTexture, transparent: true } );
+				var arrow1 = new THREE.Mesh( arrowGeometry, arrowMaterial );
+				arrow1.rotation.x = THREE.Math.degToRad(-90);
+				arrow1.position.y = 0.1;
+
+				scene.add( arrow1 );
+
 
 
 				// Set up load manager and load image and obj file.
@@ -136,17 +261,22 @@ var whiteFace;
 	// var mtlLoader = new THREE.MTLLoader();
 	// mtlLoader.load('objects/WhiteFace.mtl', function(materials) {
 	// 	materials.preload();
-		var objLoader = new THREE.OBJLoader( manager );
-		// objLoader.setMaterials(materials);
-		objLoader.load( 'objects/WhiteFace.obj', function ( white_face ) {
-			whiteFace = white_face;
-		 	whiteFace.scale.x = 0.2;
-			whiteFace.scale.y = 0.2;
-			whiteFace.scale.z = 0.2;
-
-			scene.add(whiteFace);
-			objects.push(whiteFace);
-			loaded = true;
+		var whiteobjLoader = new THREE.OBJLoader( manager );
+		var mtlLoader = new THREE.MTLLoader();
+			mtlLoader.setPath( 'objects/' );
+			mtlLoader.load( 'WhiteFace.mtl', function( materials ) {
+				materials.preload();
+				whiteobjLoader.setMaterials( materials );
+				console.log("WF materials set");
+				whiteobjLoader.load( 'objects/WhiteFace.obj', function ( white_face ) {
+					console.log("WF object set");
+				whiteFace = white_face;
+			 	whiteFace.scale.x = 0.4;
+				whiteFace.scale.y = 0.4;
+				whiteFace.scale.z = 0.4;
+				scene.add(whiteFace);
+				objects.push(whiteFace);
+				loaded = true;
 
 			//renderer
 
@@ -157,10 +287,40 @@ var whiteFace;
 			//resize
 
 			window.addEventListener( 'resize', onWindowResize, false );
-			animate();
-			}, onProgress, onError );
 
+			if (whiteFace) {
+			animate();
 			}
+			}, onProgress, onError );
+		});
+
+		var carobjLoader = new THREE.OBJLoader( manager );
+		mtlLoader = new THREE.MTLLoader();
+		mtlLoader.setPath( 'objects/' );
+			mtlLoader.load( 'Camaro.mtl', function( materials ) {
+				materials.preload();
+				carobjLoader.setMaterials( materials );
+				console.log("car materials set");
+				// carobjLoader.setMaterials(materials);
+				carobjLoader.load( 'objects/Camaro.obj', function ( camaro ) {
+					console.log("car loaded");
+				car1 = camaro;
+				car1.scale.x = 2.5;
+				car1.scale.y = 2.3;
+				car1.scale.z = 2.5;
+				car1.position.x = -35;
+				car1.position.z = 27;
+				car1.rotation.y = THREE.Math.degToRad(90);
+				scene.add(car1);
+				objects.push(car1);
+				loaded = true;
+
+			if (car1) {
+			animate();
+			}
+			}, onProgress, onError );
+		});
+		}
 
 			function onWindowResize() {
 
@@ -172,8 +332,8 @@ var whiteFace;
 			}
 
 			function animate() {
-				if (whiteFace) {
-					whiteFace.lookAt(camera.position);
+				// if (whiteFace) {
+					//whiteFace.lookAt(camera.position);
 
 					keyboard.update();
 
@@ -219,6 +379,8 @@ var whiteFace;
 
 						var onObject = intersections.length > 0;
 
+						console.log(intersections.length);
+
 						var time = performance.now();
 						var delta = ( time - prevTime ) / 1000;
 
@@ -229,9 +391,10 @@ var whiteFace;
 
 						direction.z = Number( moveForward ) - Number( moveBackward );
 						direction.x = Number( moveLeft ) - Number( moveRight );
-						direction.normalize(); // this ensures consistent movements in all directions
-
-						if ( moveForward || moveBackward ) velocity.z -= direction.z * 400.0 * delta;
+						//direction.normalize(); // this ensures consistent movements in all directions
+						if ( moveForward || moveBackward ){
+							velocity.z -= direction.z * 400.0 * delta;
+						}
 						if ( moveLeft || moveRight ) velocity.x -= direction.x * 400.0 * delta;
 
 						if ( onObject === true ) {
@@ -259,5 +422,5 @@ var whiteFace;
 					}
 
 					renderer.render( scene, camera );
-				}
+				// }
 			}
