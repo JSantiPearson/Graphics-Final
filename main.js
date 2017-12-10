@@ -1,5 +1,6 @@
 var camera, scene, renderer, controls;
-var whiteFace;
+var whiteFace, spriteFace;
+var redLight, counter = 0, countUp = true;
 
 			var objects = [];
 
@@ -87,14 +88,21 @@ var whiteFace;
 			function init() {
 
 				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 1000 );
+				camera.position.y = 3;
 
 				scene = new THREE.Scene();
 				scene.background = new THREE.Color( 0x000000 );
-				//scene.fog = new THREE.Fog( 0x000000, 0, 175 );
+				scene.fog = new THREE.Fog( 0x000000, 0, 175 );
 
 				var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.5 );
 				light.position.set( 0.5, 1, 0.75 );
 				scene.add( light );
+
+				redLight = new THREE.PointLight( 0xff0000, 2, 15 );
+				redLight.position.y = 13;
+				redLight.position.x = -40;
+				redLight.position.z = 24;
+				scene.add( redLight );
 
 				controls = new THREE.PointerLockControls( camera );
 				scene.add( controls.getObject() );
@@ -233,12 +241,27 @@ var whiteFace;
 				//arrow
 				var arrowGeometry = new THREE.PlaneGeometry( 20, 20, 100, 100 );
 				var arrowTexture = new THREE.TextureLoader().load( "textures/arrow.png" );
-				var arrowMaterial = new THREE.MeshLambertMaterial( { map: arrowTexture, transparent: true } );
+				var arrowMaterial = new THREE.MeshLambertMaterial( { map: arrowTexture, side: THREE.DoubleSide, transparent: true } );
 				var arrow1 = new THREE.Mesh( arrowGeometry, arrowMaterial );
 				arrow1.rotation.x = THREE.Math.degToRad(-90);
+				arrow1.rotation.z = THREE.Math.degToRad(-90);
+				arrow1.opacity = 0.1;
 				arrow1.position.y = 0.1;
+				arrow1.position.z = 280;
+				arrow1.position.x = -100;
 
 				scene.add( arrow1 );
+
+				var spriteMap = new THREE.TextureLoader().load( "textures/White_Face.png" );
+				var spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, fog: true, side: THREE.DoubleSide, transparent: true,  } );
+				whiteFace = new THREE.Sprite( spriteMaterial );
+				whiteFace.scale.y = 20;
+				whiteFace.scale.x = 15;
+				whiteFace.scale.z = 20;
+				whiteFace.position.x = 10;
+				whiteFace.position.y = 10;
+				whiteFace.position.z = 10;
+				scene.add( whiteFace );
 
 
 
@@ -258,25 +281,25 @@ var whiteFace;
 	var onError = function ( xhr ) {
 	};
 
-	// var mtlLoader = new THREE.MTLLoader();
-	// mtlLoader.load('objects/WhiteFace.mtl', function(materials) {
-	// 	materials.preload();
-		var whiteobjLoader = new THREE.OBJLoader( manager );
-		var mtlLoader = new THREE.MTLLoader();
-			mtlLoader.setPath( 'objects/' );
-			mtlLoader.load( 'WhiteFace.mtl', function( materials ) {
-				materials.preload();
-				whiteobjLoader.setMaterials( materials );
-				console.log("WF materials set");
-				whiteobjLoader.load( 'objects/WhiteFace.obj', function ( white_face ) {
-					console.log("WF object set");
-				whiteFace = white_face;
-			 	whiteFace.scale.x = 0.4;
-				whiteFace.scale.y = 0.4;
-				whiteFace.scale.z = 0.4;
-				scene.add(whiteFace);
-				objects.push(whiteFace);
-				loaded = true;
+	var carobjLoader = new THREE.OBJLoader( manager );
+	var mtlLoader = new THREE.MTLLoader();
+	mtlLoader.setPath( 'objects/' );
+		mtlLoader.load( 'Camaro.mtl', function( materials ) {
+			materials.preload();
+			carobjLoader.setMaterials( materials );
+			// carobjLoader.setMaterials(materials);
+			carobjLoader.load( 'objects/Camaro.obj', function ( camaro ) {
+			car1 = camaro;
+			car1.side = THREE.DoubleSide;
+			car1.scale.x = 2.7;
+			car1.scale.y = 2.5;
+			car1.scale.z = 2.7;
+			car1.position.x = -40;
+			car1.position.z = 24;
+			car1.rotation.y = THREE.Math.degToRad(93);
+			scene.add(car1);
+			objects.push(car1);
+			loaded = true;
 
 			//renderer
 
@@ -288,38 +311,36 @@ var whiteFace;
 
 			window.addEventListener( 'resize', onWindowResize, false );
 
-			if (whiteFace) {
-			animate();
-			}
-			}, onProgress, onError );
-		});
+		if (car1) {
+		animate();
+		}
+		}, onProgress, onError );
+	});
 
-		var carobjLoader = new THREE.OBJLoader( manager );
-		mtlLoader = new THREE.MTLLoader();
-		mtlLoader.setPath( 'objects/' );
-			mtlLoader.load( 'Camaro.mtl', function( materials ) {
-				materials.preload();
-				carobjLoader.setMaterials( materials );
-				console.log("car materials set");
-				// carobjLoader.setMaterials(materials);
-				carobjLoader.load( 'objects/Camaro.obj', function ( camaro ) {
-					console.log("car loaded");
-				car1 = camaro;
-				car1.scale.x = 2.5;
-				car1.scale.y = 2.3;
-				car1.scale.z = 2.5;
-				car1.position.x = -35;
-				car1.position.z = 27;
-				car1.rotation.y = THREE.Math.degToRad(90);
-				scene.add(car1);
-				objects.push(car1);
-				loaded = true;
+	/* lock by Rory Vickers on BlendSwap */
+	var lockobjLoader = new THREE.OBJLoader( manager );
+	mtlLoader = new THREE.MTLLoader();
+	mtlLoader.setPath( 'objects/' );
+		mtlLoader.load( 'padlock.mtl', function( materials ) {
+			materials.preload();
+			lockobjLoader.setMaterials( materials );
+			lockobjLoader.load( 'objects/padlock.obj', function ( padlock ) {
+			lock = padlock;
+			lock.position.z = 318;
+			lock.position.x = -90;
+			lock.position.y = 10;
+			lock.scale.x = 0.5;
+			lock.scale.y = 0.5;
+			lock.scale.z = 0.5;
+			scene.add(lock);
+			objects.push(lock);
+			loaded = true;
 
-			if (car1) {
-			animate();
-			}
-			}, onProgress, onError );
-		});
+		if (lock) {
+		animate();
+		}
+		}, onProgress, onError );
+	});
 		}
 
 			function onWindowResize() {
@@ -332,9 +353,6 @@ var whiteFace;
 			}
 
 			function animate() {
-				// if (whiteFace) {
-					//whiteFace.lookAt(camera.position);
-
 					keyboard.update();
 
 					if (keyboard.down("W")) {
@@ -368,6 +386,37 @@ var whiteFace;
 
 					}
 
+					console.log(whiteFace.position);
+
+					//enemy follow AI
+					var dir = new THREE.Vector3();
+					dir.x = controls.getObject().position.x - whiteFace.position.x;
+					dir.z = controls.getObject().position.z - whiteFace.position.z;
+					dir.y = controls.getObject().position.y - whiteFace.position.y;
+					dir.normalize();
+					whiteFace.position.x += dir.x * 0.2;
+					whiteFace.position.z += dir.z * 0.2;
+
+					//Red light counter
+					var limit = 350;
+
+					if (counter <= limit && countUp === true) {
+						counter += 2;
+					}
+					else if (counter > limit) {
+						countUp = false;
+						redLight.intensity = 0;
+						counter--;
+					}
+					else if (counter >= 0 && countUp === false){
+						counter--;
+					}
+					else if (counter < 0){
+						countUp = true;
+						redLight.intensity = 2;
+						counter++;
+					}
+
 					requestAnimationFrame( animate );
 
 					if ( controlsEnabled === true ) {
@@ -378,8 +427,6 @@ var whiteFace;
 						var intersections = raycaster.intersectObjects( objects );
 
 						var onObject = intersections.length > 0;
-
-						console.log(intersections.length);
 
 						var time = performance.now();
 						var delta = ( time - prevTime ) / 1000;
