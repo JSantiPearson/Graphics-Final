@@ -1,6 +1,9 @@
 var camera, scene, renderer, controls;
 var whiteFace, spriteFace;
 var redLight, counter = 0, countUp = true;
+var mouse = new THREE.Vector2(), INTERSECTED;
+var radius = 100, theta = 0;
+
 
 			var objects = [];
 
@@ -10,6 +13,9 @@ var redLight, counter = 0, countUp = true;
 
 			var blocker = document.getElementById( 'blocker' );
 			var instructions = document.getElementById( 'instructions' );
+			var carText = document.getElementById( 'carText' );
+			carText.style.display = 'none';
+			lockText.style.display = 'none';
 
 			// http://www.html5rocks.com/en/tutorials/pointerlock/intro/
 
@@ -236,15 +242,13 @@ var redLight, counter = 0, countUp = true;
 				scene.add( pillar5 );
 				scene.add( pillar6 );
 
-				objects.push( pillar1 );
-
 				//arrow
 				var arrowGeometry = new THREE.PlaneGeometry( 20, 20, 100, 100 );
 				var arrowTexture = new THREE.TextureLoader().load( "textures/arrow.png" );
 				var arrowMaterial = new THREE.MeshLambertMaterial( { map: arrowTexture, side: THREE.DoubleSide, transparent: true } );
 				var arrow1 = new THREE.Mesh( arrowGeometry, arrowMaterial );
 				arrow1.rotation.x = THREE.Math.degToRad(-90);
-				arrow1.rotation.z = THREE.Math.degToRad(-90);
+				arrow1.rotation.z = THREE.Math.degToRad(90);
 				arrow1.opacity = 0.1;
 				arrow1.position.y = 0.1;
 				arrow1.position.z = 280;
@@ -263,7 +267,22 @@ var redLight, counter = 0, countUp = true;
 				whiteFace.position.z = 10;
 				scene.add( whiteFace );
 
+				var carBoxGeometry = new THREE.BoxBufferGeometry( 55, 30, 30 );
+				var carBox = new THREE.Mesh( carBoxGeometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff, transparent: true, opacity: 0 } ) );
+				carBox.name = "car box";
+				carBox.side = THREE.DoubleSide;
+				carBox.position.x = -40;
+				carBox.position.z = 24;
+				scene.add( carBox );
 
+				var lockBoxGeometry = new THREE.BoxBufferGeometry( 30, 30, 7 );
+				var lockBox = new THREE.Mesh( lockBoxGeometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff, transparent: true, opacity: 0 } ) );
+				lockBox.name = "lock box";
+				lockBox.side = THREE.DoubleSide;
+				lockBox.position.z = 318;
+				lockBox.position.x = -90;
+				lockBox.position.y = 10;
+				scene.add( lockBox );
 
 				// Set up load manager and load image and obj file.
 	var manager = new THREE.LoadingManager();
@@ -298,7 +317,6 @@ var redLight, counter = 0, countUp = true;
 			car1.position.z = 24;
 			car1.rotation.y = THREE.Math.degToRad(93);
 			scene.add(car1);
-			objects.push(car1);
 			loaded = true;
 
 			//renderer
@@ -312,6 +330,9 @@ var redLight, counter = 0, countUp = true;
 			window.addEventListener( 'resize', onWindowResize, false );
 
 		if (car1) {
+			//objects push
+		objects.push( carBox );
+		objects.push( lockBox );
 		animate();
 		}
 		}, onProgress, onError );
@@ -333,7 +354,7 @@ var redLight, counter = 0, countUp = true;
 			lock.scale.y = 0.5;
 			lock.scale.z = 0.5;
 			scene.add(lock);
-			objects.push(lock);
+			//objects.push(lock);
 			loaded = true;
 
 		if (lock) {
@@ -386,8 +407,6 @@ var redLight, counter = 0, countUp = true;
 
 					}
 
-					console.log(whiteFace.position);
-
 					//enemy follow AI
 					var dir = new THREE.Vector3();
 					dir.x = controls.getObject().position.x - whiteFace.position.x;
@@ -424,10 +443,6 @@ var redLight, counter = 0, countUp = true;
 						raycaster.ray.origin.copy( controls.getObject().position );
 						raycaster.ray.origin.y -= 10;
 
-						var intersections = raycaster.intersectObjects( objects );
-
-						var onObject = intersections.length > 0;
-
 						var time = performance.now();
 						var delta = ( time - prevTime ) / 1000;
 
@@ -443,13 +458,6 @@ var redLight, counter = 0, countUp = true;
 							velocity.z -= direction.z * 400.0 * delta;
 						}
 						if ( moveLeft || moveRight ) velocity.x -= direction.x * 400.0 * delta;
-
-						if ( onObject === true ) {
-
-							velocity.y = Math.max( 0, velocity.y );
-							canJump = true;
-
-						}
 
 						controls.getObject().translateX( velocity.x * delta );
 						controls.getObject().translateY( velocity.y * delta );
@@ -467,6 +475,27 @@ var redLight, counter = 0, countUp = true;
 						prevTime = time;
 
 					}
+
+					raycaster.setFromCamera( mouse, camera );
+					var intersects = raycaster.intersectObjects( objects );
+					if ( intersects.length > 0 ) {
+						if ( INTERSECTED != intersects[ 0 ].object ) {
+							if (keyboard.pressed("E")){
+								if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+								INTERSECTED = intersects[ 0 ].object;
+								INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+								if (INTERSECTED.name === "car box") carText.style.display = 'block';
+								if (INTERSECTED.name === "lock box") lockText.style.display = 'block';
+							}
+						}
+					} else {
+						if ( INTERSECTED ){
+							if (INTERSECTED.name === "car box") carText.style.display = 'none';
+							if (INTERSECTED.name === "lock box") lockText.style.display = 'none';
+						}
+						INTERSECTED = null;
+					}
+
 
 					renderer.render( scene, camera );
 				// }
