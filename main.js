@@ -2,10 +2,7 @@ var camera, scene, renderer, controls;
 var whiteFace, spriteFace;
 var redLight, counter = 0, countUp = true;
 var mouse = new THREE.Vector2(), INTERSECTED;
-var radius = 100, theta = 0;
-
-
-			var objects = [];
+var collide = [];
 
 			var raycaster;
 
@@ -330,9 +327,6 @@ var radius = 100, theta = 0;
 			window.addEventListener( 'resize', onWindowResize, false );
 
 		if (car1) {
-			//objects push
-		objects.push( carBox );
-		objects.push( lockBox );
 		animate();
 		}
 		}, onProgress, onError );
@@ -357,7 +351,27 @@ var radius = 100, theta = 0;
 			//objects.push(lock);
 			loaded = true;
 
-		if (lock) {
+		if (lock && car1) {
+
+			//collide
+
+			collide.push( wall1 );
+			collide.push( wall2 );
+			collide.push( wall3 );
+			collide.push( wall4 );
+			collide.push( wall5 );
+			collide.push( wall6 );
+			collide.push( wall7 );
+			collide.push( pillar1 );
+			collide.push( pillar2 );
+			collide.push( pillar3 );
+			collide.push( pillar4 );
+			collide.push( pillar5 );
+			collide.push( pillar6 );
+			collide.push( gate );
+			collide.push( carBox );
+			collide.push( lockBox );
+
 		animate();
 		}
 		}, onProgress, onError );
@@ -376,20 +390,17 @@ var radius = 100, theta = 0;
 			function animate() {
 					keyboard.update();
 
-					if (keyboard.down("W")) {
-						moveForward = true;
-					}
-					if (keyboard.down("A")) {
-						moveLeft = true;
-					}
-					if (keyboard.down("S")) {
-						moveBackward = true;
+				if (keyboard.down("A")) {
+					moveLeft = true;
+				}
+				if (keyboard.down("S")) {
+					moveBackward = true;
 
-					}
-					if (keyboard.down("D")) {
-						moveRight = true;
+				}
+				if (keyboard.down("D")) {
+					moveRight = true;
 
-					}
+				}
 					if (keyboard.up("W")) {
 						moveForward = false;
 
@@ -477,18 +488,23 @@ var radius = 100, theta = 0;
 					}
 
 					raycaster.setFromCamera( mouse, camera );
-					var intersects = raycaster.intersectObjects( objects );
+					console.log(mouse);
+					var intersects = raycaster.intersectObjects( collide );
 					if ( intersects.length > 0 ) {
 						if ( INTERSECTED != intersects[ 0 ].object ) {
-							if (keyboard.pressed("E")){
 								if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
 								INTERSECTED = intersects[ 0 ].object;
 								INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-								if (INTERSECTED.name === "car box") carText.style.display = 'block';
-								if (INTERSECTED.name === "lock box") lockText.style.display = 'block';
-							}
+								moveForward = false;
+								if (keyboard.pressed("E")){
+									if (INTERSECTED.name === "car box") carText.style.display = 'block';
+									if (INTERSECTED.name === "lock box") lockText.style.display = 'block';
+								}
 						}
-					} else {
+					} else{
+					if (keyboard.pressed("W")) {
+						moveForward = true;
+					}
 						if ( INTERSECTED ){
 							if (INTERSECTED.name === "car box") carText.style.display = 'none';
 							if (INTERSECTED.name === "lock box") lockText.style.display = 'none';
