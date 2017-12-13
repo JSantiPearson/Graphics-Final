@@ -110,6 +110,11 @@ var collide = [];
 				controls = new THREE.PointerLockControls( camera );
 				scene.add( controls.getObject() );
 
+				var cubeGeometry = new THREE.CubeGeometry(2,2,2,1,1,1);
+				var wireMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe:true } );
+				player = new THREE.Mesh( cubeGeometry, wireMaterial );
+				scene.add( player );
+
 				raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
 
 				// floor
@@ -138,40 +143,47 @@ var collide = [];
 				var wall1 = new THREE.Mesh( wallGeometry, wallMaterial );
 				wall1.position.z = -220;
 				scene.add( wall1 );
+				collidableMeshList.push( wall1 );
 
 				var wall2 = new THREE.Mesh( wallGeometry, wallMaterial );
 				wall2.rotation.x = THREE.Math.degToRad(180);
 				wall2.position.z = 220;
 				wall2.position.x = 180;
 				scene.add( wall2 );
+				collidableMeshList.push( wall2 );
 
 				var wall5 = new THREE.Mesh( wallGeometry, wallMaterial );
 				wall5.rotation.x = THREE.Math.degToRad(180);
 				wall5.position.z = 220;
 				wall5.position.x = -380;
 				scene.add( wall5 );
+				collidableMeshList.push( wall5 );
 
 				var wall6 = new THREE.Mesh( wallGeometry, wallMaterial );
 				wall6.rotation.y = THREE.Math.degToRad(90);
 				wall6.position.z = 470;
 				wall6.position.x = -70;
 				scene.add( wall6 );
+				collidableMeshList.push( wall6 );
 
 				var wall7 = new THREE.Mesh( wallGeometry, wallMaterial );
 				wall7.rotation.y = THREE.Math.degToRad(90);
 				wall7.position.z = 470;
 				wall7.position.x = -130;
 				scene.add( wall7 );
+				collidableMeshList.push( wall7 );
 
 				var wall3 = new THREE.Mesh( wallGeometry, wallMaterial );
 				wall3.rotation.y = THREE.Math.degToRad(90);
 				wall3.position.x = 250;
 				scene.add( wall3 );
+				collidableMeshList.push( wall3 );
 
 				var wall4 = new THREE.Mesh( wallGeometry, wallMaterial );
 				wall4.rotation.y = THREE.Math.degToRad(90);
 				wall4.position.x = -250;
 				scene.add( wall4 );
+				collidableMeshList.push( wall4 );
 
 				var gateGeometry = new THREE.PlaneGeometry( 60, 100, 100, 100 );
 				var gateTexture = new THREE.TextureLoader().load( "textures/Gate.jpg" );
@@ -182,6 +194,7 @@ var collide = [];
 				gate.position.x = -100;
 
 				scene.add( gate );
+				collidableMeshList.push( gate );
 
 				//ceiling
 
@@ -213,6 +226,12 @@ var collide = [];
 				var pillar4 = new THREE.Mesh( pillarGeometry, pillarMaterial );
 				var pillar5 = new THREE.Mesh( pillarGeometry, pillarMaterial );
 				var pillar6 = new THREE.Mesh( pillarGeometry, pillarMaterial );
+				collidableMeshList.push( pillar1 );
+				collidableMeshList.push( pillar2 );
+				collidableMeshList.push( pillar3 );
+				collidableMeshList.push( pillar4 );
+				collidableMeshList.push( pillar5 );
+				collidableMeshList.push( pillar6 );
 
 				pillar1.position.z = 80;
 				pillar1.position.x = -10;
@@ -273,7 +292,7 @@ var collide = [];
 				scene.add( carBox );
 
 				var lockBoxGeometry = new THREE.BoxBufferGeometry( 30, 30, 7 );
-				var lockBox = new THREE.Mesh( lockBoxGeometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff, transparent: true, opacity: 0 } ) );
+				var lockBox = new THREE.Mesh( lockBoxGeometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0 } ) );
 				lockBox.name = "lock box";
 				lockBox.side = THREE.DoubleSide;
 				lockBox.position.z = 318;
@@ -388,6 +407,9 @@ var collide = [];
 			}
 
 			function animate() {
+					player.position.x = controls.getObject().position.x;
+					player.position.y = controls.getObject().position.y;
+					player.position.z = controls.getObject().position.z;
 					keyboard.update();
 
 				if (keyboard.down("A")) {
@@ -512,6 +534,20 @@ var collide = [];
 						INTERSECTED = null;
 					}
 
+				// 	var originPoint = player.position.clone();
+				// 		var ray = new THREE.Raycaster();
+        //
+				// for (var vertexIndex = 0; vertexIndex < player.geometry.vertices.length; vertexIndex++)
+				// {
+				// 	var localVertex = player.geometry.vertices[vertexIndex].clone();
+				// 	var globalVertex = localVertex.applyMatrix4( player.matrix );
+				// 	var directionVector = globalVertex.sub( player.position );
+				// 	ray.set(	originPoint, directionVector.clone().normalize() );
+        //
+				// 	var collisionResults = ray.intersectObjects( collidableMeshList );
+				// 	if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() )
+				// 		console.log("hit");
+				// }
 
 					renderer.render( scene, camera );
 				// }
