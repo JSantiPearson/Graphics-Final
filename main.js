@@ -1,8 +1,18 @@
-var camera, scene, renderer, controls;
-var whiteFace, spriteFace;
-var redLight, counter = 0, countUp = true;
-var mouse = new THREE.Vector2(), INTERSECTED;
+var camera, scene, renderer, controls, light, floor
+var whiteFace, gate, lock, lockBox;
+var redLight, counter = 0, countUp = true, frenzy = 0;
+var mouse = new THREE.Vector2(), INTERSECTED = null;
 var collide = [];
+var gotKey1 = false, exit = false, end = false;
+var SPEED = 0.3;
+
+// create a global audio source
+var listener = new THREE.AudioListener();
+var ambience = new THREE.Audio( listener );
+var steps = new THREE.Audio( listener );
+var statik = new THREE.Audio( listener );
+var laugh = new THREE.Audio( listener );
+var audioLoader = new THREE.AudioLoader();
 
 			var raycaster;
 
@@ -13,6 +23,7 @@ var collide = [];
 			var carText = document.getElementById( 'carText' );
 			carText.style.display = 'none';
 			lockText.style.display = 'none';
+			escapeText.style.display = 'none';
 
 			// http://www.html5rocks.com/en/tutorials/pointerlock/intro/
 
@@ -92,12 +103,45 @@ var collide = [];
 
 				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 1000 );
 				camera.position.y = 3;
+				camera.add( listener );
+
+				//Load ambience
+				audioLoader.load( 'sounds/ambience.wav', function( buffer ) {
+					ambience.setBuffer( buffer );
+					ambience.setLoop( true );
+					ambience.setVolume( 0.5 );
+					ambience.play();
+				});
+				//Load steps
+				audioLoader.load( 'sounds/steps.wav', function( buffer ) {
+					steps.setBuffer( buffer );
+					steps.setLoop( true );
+					steps.setVolume( 0.2 );
+					steps.play();
+					steps.pause();
+				});
+
+				audioLoader.load( 'sounds/static.mp3', function( buffer ) {
+					statik.setBuffer( buffer );
+					statik.setLoop( true );
+					statik.setVolume( 0.2 );
+					statik.play();
+					statik.pause();
+				});
+
+				audioLoader.load( 'sounds/laugh.mp3', function( buffer ) {
+					laugh.setBuffer( buffer );
+					laugh.setLoop( false );
+					laugh.setVolume( 0.6 );
+					laugh.play();
+					laugh.pause();
+				});
 
 				scene = new THREE.Scene();
 				scene.background = new THREE.Color( 0x000000 );
 				scene.fog = new THREE.Fog( 0x000000, 0, 175 );
 
-				var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.5 );
+				light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.5 );
 				light.position.set( 0.5, 1, 0.75 );
 				scene.add( light );
 
@@ -126,9 +170,9 @@ var collide = [];
 				floorTexture.wrapT = THREE.RepeatWrapping;
 				floorTexture.repeat.set( 11, 11 );
 
-				var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture } );
+				var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, transparent: false, opacity: 100 } );
 
-				var floor = new THREE.Mesh( floorGeometry, floorMaterial );
+				floor = new THREE.Mesh( floorGeometry, floorMaterial );
 				scene.add( floor );
 
 				//walls
@@ -143,58 +187,51 @@ var collide = [];
 				var wall1 = new THREE.Mesh( wallGeometry, wallMaterial );
 				wall1.position.z = -220;
 				scene.add( wall1 );
-				collidableMeshList.push( wall1 );
 
 				var wall2 = new THREE.Mesh( wallGeometry, wallMaterial );
 				wall2.rotation.x = THREE.Math.degToRad(180);
 				wall2.position.z = 220;
 				wall2.position.x = 180;
 				scene.add( wall2 );
-				collidableMeshList.push( wall2 );
 
 				var wall5 = new THREE.Mesh( wallGeometry, wallMaterial );
 				wall5.rotation.x = THREE.Math.degToRad(180);
 				wall5.position.z = 220;
 				wall5.position.x = -380;
 				scene.add( wall5 );
-				collidableMeshList.push( wall5 );
 
 				var wall6 = new THREE.Mesh( wallGeometry, wallMaterial );
 				wall6.rotation.y = THREE.Math.degToRad(90);
 				wall6.position.z = 470;
 				wall6.position.x = -70;
 				scene.add( wall6 );
-				collidableMeshList.push( wall6 );
 
 				var wall7 = new THREE.Mesh( wallGeometry, wallMaterial );
 				wall7.rotation.y = THREE.Math.degToRad(90);
 				wall7.position.z = 470;
 				wall7.position.x = -130;
 				scene.add( wall7 );
-				collidableMeshList.push( wall7 );
 
 				var wall3 = new THREE.Mesh( wallGeometry, wallMaterial );
 				wall3.rotation.y = THREE.Math.degToRad(90);
 				wall3.position.x = 250;
 				scene.add( wall3 );
-				collidableMeshList.push( wall3 );
 
 				var wall4 = new THREE.Mesh( wallGeometry, wallMaterial );
 				wall4.rotation.y = THREE.Math.degToRad(90);
 				wall4.position.x = -250;
 				scene.add( wall4 );
-				collidableMeshList.push( wall4 );
 
 				var gateGeometry = new THREE.PlaneGeometry( 60, 100, 100, 100 );
 				var gateTexture = new THREE.TextureLoader().load( "textures/Gate.jpg" );
 				var gateMaterial = new THREE.MeshLambertMaterial( { map: gateTexture, side: THREE.DoubleSide, transparent: true } );
-				var gate = new THREE.Mesh( gateGeometry, gateMaterial );
+				gate = new THREE.Mesh( gateGeometry, gateMaterial );
 				//gate.rotation.y = THREE.Math.degToRad(-90);
 				gate.position.z = 320;
 				gate.position.x = -100;
+				gate.position.y = 0;
 
 				scene.add( gate );
-				collidableMeshList.push( gate );
 
 				//ceiling
 
@@ -226,12 +263,6 @@ var collide = [];
 				var pillar4 = new THREE.Mesh( pillarGeometry, pillarMaterial );
 				var pillar5 = new THREE.Mesh( pillarGeometry, pillarMaterial );
 				var pillar6 = new THREE.Mesh( pillarGeometry, pillarMaterial );
-				collidableMeshList.push( pillar1 );
-				collidableMeshList.push( pillar2 );
-				collidableMeshList.push( pillar3 );
-				collidableMeshList.push( pillar4 );
-				collidableMeshList.push( pillar5 );
-				collidableMeshList.push( pillar6 );
 
 				pillar1.position.z = 80;
 				pillar1.position.x = -10;
@@ -278,21 +309,33 @@ var collide = [];
 				whiteFace.scale.y = 20;
 				whiteFace.scale.x = 15;
 				whiteFace.scale.z = 20;
-				whiteFace.position.x = 10;
+				whiteFace.position.x = 100;
 				whiteFace.position.y = 10;
-				whiteFace.position.z = 10;
+				whiteFace.position.z = 100;
 				scene.add( whiteFace );
 
+				spriteMap = new THREE.TextureLoader().load( "textures/key.png" );
+				spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, fog: true, side: THREE.DoubleSide, transparent: true,  } );
+				key1 = new THREE.Sprite( spriteMaterial );
+				key1.scale.y = 5;
+				key1.scale.x = 5;
+				key1.scale.z = 5;
+				key1.position.x = 190;
+				key1.position.y = 7;
+				key1.position.z = -100;
+				scene.add( key1 );
+
 				var carBoxGeometry = new THREE.BoxBufferGeometry( 55, 30, 30 );
-				var carBox = new THREE.Mesh( carBoxGeometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff, transparent: true, opacity: 0 } ) );
+				var carBox = new THREE.Mesh( carBoxGeometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0 } ) );
 				carBox.name = "car box";
 				carBox.side = THREE.DoubleSide;
 				carBox.position.x = -40;
 				carBox.position.z = 24;
+				carBox.position.y = 5;
 				scene.add( carBox );
 
 				var lockBoxGeometry = new THREE.BoxBufferGeometry( 30, 30, 7 );
-				var lockBox = new THREE.Mesh( lockBoxGeometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0 } ) );
+				lockBox = new THREE.Mesh( lockBoxGeometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0 } ) );
 				lockBox.name = "lock box";
 				lockBox.side = THREE.DoubleSide;
 				lockBox.position.z = 318;
@@ -406,12 +449,94 @@ var collide = [];
 
 			}
 
+			function enemyChase(){
+				//enemy follow AI
+				if (controlsEnabled){
+				var dir = new THREE.Vector3();
+				dir.x = controls.getObject().position.x - whiteFace.position.x;
+				dir.z = controls.getObject().position.z - whiteFace.position.z;
+				dir.y = controls.getObject().position.y - whiteFace.position.y;
+				dir.normalize();
+				whiteFace.position.x += dir.x * SPEED;
+				whiteFace.position.z += dir.z * SPEED;
+				if (controls.getObject().position.x - whiteFace.position.x < 1 && controls.getObject().position.x - whiteFace.position.x > -1 && controls.getObject().position.z - whiteFace.position.z < 1 && controls.getObject().position.z - whiteFace.position.z > -1 ){
+					// light.intensity = 0;
+					// floor.material.transparent = true;
+					// floor.material.opacity = 0;
+					// statik.play();
+					// moveForward = false;
+					// moveLeft = false;
+					// moveRight = false;
+					// moveBackward = true;
+					// controlsEnabled = false;
+				}
+			}
+				// if ( frenzy === 2 && counter === 10){
+				// 	var coinFlipX = Math.floor(Math.random() * 2);
+				// 	var coinFlipY = Math.floor(Math.random() * 2);
+				// 		if (coinFlipX) {
+				// 			randX = 150;
+				// 		}
+				// 		else{
+				// 			randX = -150;
+				// 		}
+				// 		if (coinFlipY) {
+				// 			randY = 150;
+				// 		}
+				// 		else{
+				// 			randY = -150;
+				// 		}
+				// 	whiteFace.position.x = dir.x + randX;
+				// 	whiteFace.position.z = dir.z + randY;
+				// }
+			}
+
 			function animate() {
+				console.log(controls.getObject().position.x - whiteFace.position.x);
+				if (end){
+					steps.pause();
+					ambience.pause();
+					console.log(counter);
+					gate.position.y += 1;
+					lock.position.y += 1;
+					lockBox.position.y += 1;
+					if (counter === 100) controlsEnabled = true;
+					if (counter === 300){
+						whiteFace.position.y = 10;
+						whiteFace.position.z = 600;
+						whiteFace.position.x = -100;
+					}
+					else if (counter > 300){
+						SPEED = 1;
+						enemyChase();
+						if (counter === 450){
+							 light.intensity = 0;
+							 floor.material.transparent = true;
+							 floor.material.opacity = 0;
+						 }
+					}
+				}
+
+					if (gotKey1 === false && exit === false && player.position.x < key1.position.x + 5 && player.position.x > key1.position.x - 5 && player.position.z < key1.position.z + 5 && player.position.z > key1.position.z - 5){
+						gotKey1 = true;
+					}
+
+					if (gotKey1){
+						key1.position.y = -100;
+						exit = true;
+						escapeText.style.display = 'block';
+						counter = 0;
+						gotKey1 = false;
+					}
+
+					if (exit === true && counter >= 200) escapeText.style.display = 'none';
+
 					player.position.x = controls.getObject().position.x;
 					player.position.y = controls.getObject().position.y;
 					player.position.z = controls.getObject().position.z;
 					keyboard.update();
 
+				if (controlsEnabled){
 				if (keyboard.down("A")) {
 					moveLeft = true;
 				}
@@ -423,9 +548,20 @@ var collide = [];
 					moveRight = true;
 
 				}
+				if (INTERSECTED != null && keyboard.pressed("E")){
+					if (INTERSECTED.name === "car box") carText.style.display = 'block';
+					if (INTERSECTED.name === "lock box" && exit === false) lockText.style.display = 'block';
+					if (INTERSECTED.name === "lock box" && exit && end === false){
+						whiteFace.position.y = 100000;
+						controlsEnabled = false;
+						counter = 0;
+						exit = false;
+						end = true;
+					}
+				}
 					if (keyboard.up("W")) {
+						steps.pause();
 						moveForward = false;
-
 					}
 					if (keyboard.up("A")) {
 						moveLeft = false;
@@ -439,17 +575,15 @@ var collide = [];
 						moveRight = false;
 
 					}
+				}
 
-					//enemy follow AI
-					var dir = new THREE.Vector3();
-					dir.x = controls.getObject().position.x - whiteFace.position.x;
-					dir.z = controls.getObject().position.z - whiteFace.position.z;
-					dir.y = controls.getObject().position.y - whiteFace.position.y;
-					dir.normalize();
-					whiteFace.position.x += dir.x * 0.2;
-					whiteFace.position.z += dir.z * 0.2;
+					enemyChase();
+
+					requestAnimationFrame( animate );
 
 					//Red light counter
+					if (end) counter++;
+					if (end === false){
 					var limit = 350;
 
 					if (counter <= limit && countUp === true) {
@@ -467,9 +601,20 @@ var collide = [];
 						countUp = true;
 						redLight.intensity = 2;
 						counter++;
+						frenzy++;
 					}
-
-					requestAnimationFrame( animate );
+					if (frenzy >= 2 && frenzy <= 3 ){
+						SPEED = 0.8;
+						ambience.setVolume( 0.3 );
+						if (counter === 5 && countUp && frenzy === 2) laugh.play();
+						if (counter > 70 && frenzy <= 3) statik.play();
+					}
+					else if (frenzy > 3){
+						SPEED = 0.3
+						frenzy = 0;
+						ambience.setVolume( 0.4 );
+						statik.pause();
+					}
 
 					if ( controlsEnabled === true ) {
 
@@ -510,7 +655,6 @@ var collide = [];
 					}
 
 					raycaster.setFromCamera( mouse, camera );
-					console.log(mouse);
 					var intersects = raycaster.intersectObjects( collide );
 					if ( intersects.length > 0 ) {
 						if ( INTERSECTED != intersects[ 0 ].object ) {
@@ -518,37 +662,20 @@ var collide = [];
 								INTERSECTED = intersects[ 0 ].object;
 								INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
 								moveForward = false;
-								if (keyboard.pressed("E")){
-									if (INTERSECTED.name === "car box") carText.style.display = 'block';
-									if (INTERSECTED.name === "lock box") lockText.style.display = 'block';
-								}
+								steps.pause();
 						}
 					} else{
 					if (keyboard.pressed("W")) {
 						moveForward = true;
+							steps.play();
 					}
 						if ( INTERSECTED ){
 							if (INTERSECTED.name === "car box") carText.style.display = 'none';
-							if (INTERSECTED.name === "lock box") lockText.style.display = 'none';
+							if (INTERSECTED.name === "lock box" && exit === false) lockText.style.display = 'none';
 						}
 						INTERSECTED = null;
 					}
-
-				// 	var originPoint = player.position.clone();
-				// 		var ray = new THREE.Raycaster();
-        //
-				// for (var vertexIndex = 0; vertexIndex < player.geometry.vertices.length; vertexIndex++)
-				// {
-				// 	var localVertex = player.geometry.vertices[vertexIndex].clone();
-				// 	var globalVertex = localVertex.applyMatrix4( player.matrix );
-				// 	var directionVector = globalVertex.sub( player.position );
-				// 	ray.set(	originPoint, directionVector.clone().normalize() );
-        //
-				// 	var collisionResults = ray.intersectObjects( collidableMeshList );
-				// 	if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() )
-				// 		console.log("hit");
-				// }
-
+				}
 					renderer.render( scene, camera );
 				// }
 			}
