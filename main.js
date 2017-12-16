@@ -116,15 +116,15 @@ var audioLoader = new THREE.AudioLoader();
 				audioLoader.load( 'sounds/steps.wav', function( buffer ) {
 					steps.setBuffer( buffer );
 					steps.setLoop( true );
-					steps.setVolume( 0.2 );
+					steps.setVolume( 0.4 );
 					steps.play();
 					steps.pause();
 				});
 
-				audioLoader.load( 'sounds/static.mp3', function( buffer ) {
+				audioLoader.load( 'sounds/static.wav', function( buffer ) {
 					statik.setBuffer( buffer );
 					statik.setLoop( true );
-					statik.setVolume( 0.2 );
+					statik.setVolume( 0.5 );
 					statik.play();
 					statik.pause();
 				});
@@ -155,7 +155,7 @@ var audioLoader = new THREE.AudioLoader();
 				scene.add( controls.getObject() );
 
 				var cubeGeometry = new THREE.CubeGeometry(2,2,2,1,1,1);
-				var wireMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe:true } );
+				var wireMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, transparent: true, opacity: 0, wireframe:true } );
 				player = new THREE.Mesh( cubeGeometry, wireMaterial );
 				scene.add( player );
 
@@ -460,14 +460,18 @@ var audioLoader = new THREE.AudioLoader();
 				whiteFace.position.x += dir.x * SPEED;
 				whiteFace.position.z += dir.z * SPEED;
 				if (controls.getObject().position.x - whiteFace.position.x < 1 && controls.getObject().position.x - whiteFace.position.x > -1 && controls.getObject().position.z - whiteFace.position.z < 1 && controls.getObject().position.z - whiteFace.position.z > -1 ){
+					// counter = 0;
+					// frenzy = 0;
 					// light.intensity = 0;
 					// floor.material.transparent = true;
 					// floor.material.opacity = 0;
+					// if (counter === 0) laugh.play();
 					// statik.play();
+					// whiteFace.position.y = 10000;
 					// moveForward = false;
 					// moveLeft = false;
 					// moveRight = false;
-					// moveBackward = true;
+					// moveBackward = false;
 					// controlsEnabled = false;
 				}
 			}
@@ -665,7 +669,7 @@ var audioLoader = new THREE.AudioLoader();
 								steps.pause();
 						}
 					} else{
-					if (keyboard.pressed("W")) {
+					if (keyboard.down("W")) {
 						moveForward = true;
 							steps.play();
 					}
