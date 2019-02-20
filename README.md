@@ -18,4 +18,6 @@ The game recieved an A, and I feel that it could be made even better given more 
 7. Click on White Face.
 8. Give the game a second or two to load, then enjoy!
 
+For testing and demonstration purposes, I have disabled the death state. If the monster catches up to you, you'll be just fine. :)
+
 
