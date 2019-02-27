@@ -23,8 +23,13 @@ For testing and demonstration purposes, I have disabled the death state. If the 
 ## Controls:
 
 W - Forward
+
 S - Backward
+
 A - Left
+
 D - Right
+
 E - Interact
+
 Mouse - Look around (This is a bit finicky depending on the browser)
